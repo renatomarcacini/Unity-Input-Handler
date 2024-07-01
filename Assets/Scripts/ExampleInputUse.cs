@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class ExampleInputUse : MonoBehaviour
 {
+    [SerializeField] private Vector2 leftAnalog;
+    [SerializeField] private Vector2 rightAnalog;
 
     void Update()
     {
@@ -13,5 +15,9 @@ public class ExampleInputUse : MonoBehaviour
 
         if (InputHandler.KeyHeld(INPUT.KeyButtonSouth))
             Debug.Log("BUTTON SOUTH KEY HELD");
+
+
+        leftAnalog = InputHandler.LeftAnalogNormalized;
+        rightAnalog = InputHandler.RightAnalog;
     }
 }
