@@ -17,8 +17,16 @@ public enum INPUT
     ButtonLeftTrigger,
     Start,
     Select,
-    UICancel,
-    UISubmit,
+    UI_KeyButtonNorth,
+    UI_KeyButtonSouth,
+    UI_KeyButtonWest,
+    UI_KeyButtonEast,
+    UI_ButtonRightShoulder,
+    UI_ButtonLeftShoulder,
+    UI_ButtonRightTrigger,
+    UI_ButtonLeftTrigger,
+    UI_Start,
+    UI_Select
 }
 
 public class InputHandler : Singleton<InputHandler>
@@ -30,110 +38,47 @@ public class InputHandler : Singleton<InputHandler>
     public static Dictionary<INPUT, bool> keyUpInputs = new Dictionary<INPUT, bool>();
 
     [Header("Analog Settings")]
-    [SerializeField] private float leftDeadzoneThreshold = 0.5f;
-    [SerializeField] private float rightDeadzoneThreshold = 0.5f;
+    [Space(10)]
+    [SerializeField] private string[] actions;
+    [SerializeField, Range(0, 1)] private float leftDeadzoneThreshold = 0.5f;
+    [SerializeField, Range(0, 1)] private float rightDeadzoneThreshold = 0.5f;
 
-    [SerializeField] private int numAngles = 32;
+    [SerializeField] private int numAngles = 8;
     private float angleIncrement;
     private float[] angleDivisions;
 
     private PlayerAction playerAction;
-    [SerializeField] private string[] actions;
 
+    [Header("Analog Previews")]
+    [Space(10)]
     //Left Stick Analog
-    private float leftStickHorizontal;
-    private float leftStickVertical;
-    private int leftStickHorizontalRaw;
-    private int leftStickVerticalRaw;
+    [SerializeField] private float leftStickHorizontal;
+    [SerializeField] private float leftStickVertical;
+    [SerializeField] private int leftStickHorizontalRaw;
+    [SerializeField] private int leftStickVerticalRaw;
 
     //Right Stick Analog
-    private float rightStickHorizontal;
-    private float rightStickVertical;
-    private int rightStickHorizontalRaw;
-    private int rightStickVerticalRaw;
+    [SerializeField] private float rightStickHorizontal;
+    [SerializeField] private float rightStickVertical;
+    [SerializeField] private int rightStickHorizontalRaw;
+    [SerializeField] private int rightStickVerticalRaw;
 
-    [field: SerializeField] public static Vector2 LeftAnalog { get; private set; }
-    [field: SerializeField] public static Vector2 LeftAnalogRaw { get; private set; }
-    [field: SerializeField] public static Vector2 LeftAnalogNormalized { get; private set; }
-    [field: SerializeField] public static Vector2 LeftAnalogWithDeadzone { get; private set; }
-    [field: SerializeField] public static Vector2 LeftAnalogAngled { get; private set; }
+    public static Vector2 LeftAnalog { get; private set; }
+    public static Vector2 LeftAnalogRaw { get; private set; }
+    public static Vector2 LeftAnalogNormalized { get; private set; }
+    public static Vector2 LeftAnalogWithDeadzone { get; private set; }
+    public static Vector2 LeftAnalogAngled { get; private set; }
 
-    [field: SerializeField] public static Vector2 RightAnalog { get; private set; }
-    [field: SerializeField] public static Vector2 RightAnalogRaw { get; private set; }
-    [field: SerializeField] public static Vector2 RightAnalogNormalized { get; private set; }
-    [field: SerializeField] public static Vector2 RightAnalogWithDeadzone { get; private set; }
-    [field: SerializeField] public static Vector2 RightAnalogAngled { get; private set; }
+    public static Vector2 RightAnalog { get; private set; }
+    public static Vector2 RightAnalogRaw { get; private set; }
+    public static Vector2 RightAnalogNormalized { get; private set; }
+    public static Vector2 RightAnalogWithDeadzone { get; private set; }
+    public static Vector2 RightAnalogAngled { get; private set; }
 
-
-    //Button North
-    private static bool keyHeldButtonNorth;
-    private static bool keyDownButtonNorth;
-    private static bool keyUpButtonNorth;
-
-    //Button South
-    private static bool keyHeldButtonSouth;
-    private static bool keyDownButtonSouth;
-    private static bool keyUpButtonSouth;
-
-
-    //Button West
-    private static bool keyHeldButtonWest;
-    private static bool keyDownButtonWest;
-    private static bool keyUpButtonWest;
-
-
-    //Button East
-    private static bool keyHeldButtonEast;
-    private static bool keyDownButtonEast;
-    private static bool keyUpButtonEast;
-
-
-    //Button Right Shoulder
-    private static bool keyHeldRightShoulder;
-    private static bool keyDownRightShoulder;
-    private static bool keyUpRightShoulder;
-
-
-    //Button Left Shoulder
-    private static bool keyHeldLeftShoulder;
-    private static bool keyDownLeftShoulder;
-    private static bool keyUpLeftShoulder;
-
-
-    //Button Right Trigger
-    private static bool keyHeldRightTrigger;
-    private static bool keyDownRightTrigger;
-    private static bool keyUpRightTrigger;
-
-
-    //Button LeftTrigger
-    private static bool keyHeldLeftTrigger;
-    private static bool keyDownLeftTrigger;
-    private static bool keyUpLeftTrigger;
-
-
-    //Button Start
-    private static bool keyHeldStart;
-    private static bool keyDownStart;
-    private static bool keyUpStart;
-
-
-    //Button Select
-    private static bool keyHeldSelect;
-    private static bool keyDownSelect;
-    private static bool keyUpSelect;
-
-
-    //Button Cancel
-    private static bool keyHeldCancel;
-    private static bool keyDownCancel;
-    private static bool keyUpCancel;
-
-
-    //Button Submit
-    private static bool keyHeldSubmit;
-    private static bool keyDownSubmit;
-    private static bool keyUpSubmit;
+    protected override void Awake()
+    {
+        base.Awake();
+    }
 
 
     private void Start()
@@ -146,10 +91,7 @@ public class InputHandler : Singleton<InputHandler>
             angleDivisions[i] = i * angleIncrement;
         }
         angleDivisions[angleDivisions.Length - 1] = 360f;
-    }
 
-    private void OnEnable()
-    {
         foreach (INPUT inputType in System.Enum.GetValues(typeof(INPUT)))
         {
             keyHeldInputs[inputType] = false;
@@ -169,12 +111,11 @@ public class InputHandler : Singleton<InputHandler>
             "Start",
             "Select",
             "Cancel",
-            "Submit",
-        };
+            };
 
-        playerAction = LoadActions.LoadAllActions(actions);
-
-        #region AUTOMATIC INPUT
+        //playerAction = LoadActions.LoadAllActions(actions);
+        playerAction = new PlayerAction();
+        #region PLAYER_ACTION_MAP
         //Add Started Events
         playerAction.PlayerInput.ButtonNorth.started += ctx => ButtonAction(ctx, INPUT.KeyButtonNorth);
         playerAction.PlayerInput.ButtonSouth.started += ctx => ButtonAction(ctx, INPUT.KeyButtonSouth);
@@ -190,10 +131,6 @@ public class InputHandler : Singleton<InputHandler>
         playerAction.PlayerInput.LeftVerticalMove.started += LeftStickVerticalMoveAction;
         playerAction.PlayerInput.RightHorizontalMove.started += RightStickHorizontalMoveAction;
         playerAction.PlayerInput.RightVerticalMove.started += RightStickVerticalMoveAction;
-
-        //Add Started Events UI
-        playerAction.UI.Cancel.started += ctx => ButtonAction(ctx, INPUT.UICancel);
-        playerAction.UI.Submit.started += ctx => ButtonAction(ctx, INPUT.UISubmit);
 
         //Add Performed Events
         playerAction.PlayerInput.RightTrigger.performed += ctx => ButtonAction(ctx, INPUT.ButtonRightTrigger);
@@ -218,59 +155,41 @@ public class InputHandler : Singleton<InputHandler>
         playerAction.PlayerInput.LeftVerticalMove.canceled += LeftStickVerticalMoveAction;
         playerAction.PlayerInput.RightHorizontalMove.canceled += RightStickHorizontalMoveAction;
         playerAction.PlayerInput.RightVerticalMove.canceled += RightStickVerticalMoveAction;
-
-        //Add Canceled Events UI
-        playerAction.UI.Cancel.canceled += ctx => ButtonAction(ctx, INPUT.UICancel);
-        playerAction.UI.Submit.canceled += ctx => ButtonAction(ctx, INPUT.UICancel);
         #endregion
 
-
-        #region PER INPUT
+        #region UI_ACTION_MAP
         //Add Started Events
-        playerAction.PlayerInput.ButtonNorth.started += ButtonNorthAction;
-        playerAction.PlayerInput.ButtonSouth.started += ButtonSouthAction;
-        playerAction.PlayerInput.ButtonEast.started += ButtonEastAction;
-        playerAction.PlayerInput.ButtonWest.started += ButtonWestAction;
-        playerAction.PlayerInput.RightShoulder.started += RightShoulderAction;
-        playerAction.PlayerInput.LeftShoulder.started += LeftShoulderAction;
-        playerAction.PlayerInput.RightTrigger.started += RightTriggerAction;
-        playerAction.PlayerInput.LeftTrigger.started += LeftTriggerAction;
-        playerAction.PlayerInput.Start.started += StartAction;
-        playerAction.PlayerInput.Select.started += SelectAction;
-
-        playerAction.UI.Cancel.started += CancelAction;
-        playerAction.UI.Submit.started += SubmitAction;
-
-        playerAction.PlayerInput.LeftTrigger.performed += LeftTriggerAction;
-        playerAction.PlayerInput.RightTrigger.performed += RightTriggerAction;
+        playerAction.UI.ButtonNorth.started += ctx => ButtonAction(ctx, INPUT.UI_KeyButtonNorth);
+        playerAction.UI.ButtonSouth.started += ctx => ButtonAction(ctx, INPUT.UI_KeyButtonSouth);
+        playerAction.UI.ButtonEast.started += ctx => ButtonAction(ctx, INPUT.UI_KeyButtonEast);
+        playerAction.UI.ButtonWest.started += ctx => ButtonAction(ctx, INPUT.UI_KeyButtonWest);
+        playerAction.UI.RightShoulder.started += ctx => ButtonAction(ctx, INPUT.UI_ButtonRightShoulder);
+        playerAction.UI.LeftShoulder.started += ctx => ButtonAction(ctx, INPUT.UI_ButtonLeftShoulder);
+        playerAction.UI.RightTrigger.started += ctx => ButtonAction(ctx, INPUT.UI_ButtonRightTrigger);
+        playerAction.UI.LeftTrigger.started += ctx => ButtonAction(ctx, INPUT.UI_ButtonLeftTrigger);
+        playerAction.UI.Start.started += ctx => ButtonAction(ctx, INPUT.UI_Start);
+        playerAction.UI.Select.started += ctx => ButtonAction(ctx, INPUT.UI_Select);
 
         //Add Canceled Events
-        playerAction.PlayerInput.ButtonNorth.canceled += ButtonNorthAction;
-        playerAction.PlayerInput.ButtonSouth.canceled += ButtonSouthAction;
-        playerAction.PlayerInput.ButtonEast.canceled += ButtonEastAction;
-        playerAction.PlayerInput.ButtonWest.canceled += ButtonWestAction;
-        playerAction.PlayerInput.RightShoulder.canceled += RightShoulderAction;
-        playerAction.PlayerInput.LeftShoulder.canceled += LeftShoulderAction;
-        playerAction.PlayerInput.RightTrigger.canceled += RightTriggerAction;
-        playerAction.PlayerInput.LeftTrigger.canceled += LeftTriggerAction;
-        playerAction.PlayerInput.Start.canceled += StartAction;
-        playerAction.PlayerInput.Select.canceled += SelectAction;
-
-
-        playerAction.UI.Cancel.canceled += CancelAction;
-        playerAction.UI.Submit.canceled += SubmitAction;
-
+        playerAction.UI.ButtonNorth.canceled += ctx => ButtonAction(ctx, INPUT.UI_KeyButtonNorth);
+        playerAction.UI.ButtonSouth.canceled += ctx => ButtonAction(ctx, INPUT.UI_KeyButtonSouth);
+        playerAction.UI.ButtonEast.canceled += ctx => ButtonAction(ctx, INPUT.UI_KeyButtonEast);
+        playerAction.UI.ButtonWest.canceled += ctx => ButtonAction(ctx, INPUT.UI_KeyButtonWest);
+        playerAction.UI.RightShoulder.canceled += ctx => ButtonAction(ctx, INPUT.UI_ButtonRightShoulder);
+        playerAction.UI.LeftShoulder.canceled += ctx => ButtonAction(ctx, INPUT.UI_ButtonLeftShoulder);
+        playerAction.UI.RightTrigger.canceled += ctx => ButtonAction(ctx, INPUT.UI_ButtonRightTrigger);
+        playerAction.UI.LeftTrigger.canceled += ctx => ButtonAction(ctx, INPUT.UI_ButtonLeftTrigger);
+        playerAction.UI.Start.canceled += ctx => ButtonAction(ctx, INPUT.UI_Start);
+        playerAction.UI.Select.canceled += ctx => ButtonAction(ctx, INPUT.UI_Select);
         #endregion
 
         playerAction.UI.Enable(); // Enable action with new inputs
         playerAction.PlayerInput.Enable(); // Enable action with new inputs
     }
 
-
-
-    private void OnDisable()
+    private void OnDestroy()
     {
-        #region AUTOMATIC INPUT
+        #region PLAYER_ACTION_MAP
         //Remove Started Events
         playerAction.PlayerInput.ButtonNorth.started -= ctx => ButtonAction(ctx, INPUT.KeyButtonNorth);
         playerAction.PlayerInput.ButtonSouth.started -= ctx => ButtonAction(ctx, INPUT.KeyButtonSouth);
@@ -287,12 +206,7 @@ public class InputHandler : Singleton<InputHandler>
         playerAction.PlayerInput.RightHorizontalMove.started -= RightStickHorizontalMoveAction;
         playerAction.PlayerInput.RightVerticalMove.started -= RightStickVerticalMoveAction;
 
-
-        //Remove Started Events UI
-        playerAction.UI.Cancel.started -= ctx => ButtonAction(ctx, INPUT.UICancel);
-        playerAction.UI.Submit.started -= ctx => ButtonAction(ctx, INPUT.UISubmit);
-
-        //Remove Performed Events
+        //Add Performed Events
         playerAction.PlayerInput.RightTrigger.performed -= ctx => ButtonAction(ctx, INPUT.ButtonRightTrigger);
         playerAction.PlayerInput.LeftTrigger.performed -= ctx => ButtonAction(ctx, INPUT.ButtonLeftTrigger);
         playerAction.PlayerInput.LeftHorizontalMove.performed -= LeftStickHorizontalMoveAction;
@@ -315,57 +229,45 @@ public class InputHandler : Singleton<InputHandler>
         playerAction.PlayerInput.LeftVerticalMove.canceled -= LeftStickVerticalMoveAction;
         playerAction.PlayerInput.RightHorizontalMove.canceled -= RightStickHorizontalMoveAction;
         playerAction.PlayerInput.RightVerticalMove.canceled -= RightStickVerticalMoveAction;
-
-        //Remove Canceled Events UI
-        playerAction.UI.Cancel.canceled -= ctx => ButtonAction(ctx, INPUT.UICancel);
-        playerAction.UI.Submit.canceled -= ctx => ButtonAction(ctx, INPUT.UISubmit);
         #endregion
 
+        #region UI_ACTION_MAP
+        //Add Started Events
+        playerAction.UI.ButtonNorth.started -= ctx => ButtonAction(ctx, INPUT.UI_KeyButtonNorth);
+        playerAction.UI.ButtonSouth.started -= ctx => ButtonAction(ctx, INPUT.UI_KeyButtonSouth);
+        playerAction.UI.ButtonEast.started -= ctx => ButtonAction(ctx, INPUT.UI_KeyButtonEast);
+        playerAction.UI.ButtonWest.started -= ctx => ButtonAction(ctx, INPUT.UI_KeyButtonWest);
+        playerAction.UI.RightShoulder.started -= ctx => ButtonAction(ctx, INPUT.UI_ButtonRightShoulder);
+        playerAction.UI.LeftShoulder.started -= ctx => ButtonAction(ctx, INPUT.UI_ButtonLeftShoulder);
+        playerAction.UI.RightTrigger.started -= ctx => ButtonAction(ctx, INPUT.UI_ButtonRightTrigger);
+        playerAction.UI.LeftTrigger.started -= ctx => ButtonAction(ctx, INPUT.UI_ButtonLeftTrigger);
+        playerAction.UI.Start.started -= ctx => ButtonAction(ctx, INPUT.UI_Start);
+        playerAction.UI.Select.started -= ctx => ButtonAction(ctx, INPUT.UI_Select);
 
-        #region PER INPUT
-        //Remove Started Events
-        playerAction.PlayerInput.ButtonNorth.started -= ButtonNorthAction;
-        playerAction.PlayerInput.ButtonSouth.started -= ButtonSouthAction;
-        playerAction.PlayerInput.ButtonEast.started -= ButtonEastAction;
-        playerAction.PlayerInput.ButtonWest.started -= ButtonWestAction;
-        playerAction.PlayerInput.RightShoulder.started -= RightShoulderAction;
-        playerAction.PlayerInput.LeftShoulder.started -= LeftShoulderAction;
-        playerAction.PlayerInput.RightTrigger.started -= RightTriggerAction;
-        playerAction.PlayerInput.LeftTrigger.started -= LeftTriggerAction;
-        playerAction.PlayerInput.Start.started -= StartAction;
-        playerAction.PlayerInput.Select.started -= SelectAction;
-
-        playerAction.UI.Cancel.started -= CancelAction;
-        playerAction.UI.Submit.started -= SubmitAction;
-
-        playerAction.PlayerInput.LeftTrigger.performed -= LeftTriggerAction;
-        playerAction.PlayerInput.RightTrigger.performed -= RightTriggerAction;
-
-        //Remove Canceled Events
-        playerAction.PlayerInput.ButtonNorth.canceled -= ButtonNorthAction;
-        playerAction.PlayerInput.ButtonSouth.canceled -= ButtonSouthAction;
-        playerAction.PlayerInput.ButtonEast.canceled -= ButtonEastAction;
-        playerAction.PlayerInput.ButtonWest.canceled -= ButtonWestAction;
-        playerAction.PlayerInput.RightShoulder.canceled -= RightShoulderAction;
-        playerAction.PlayerInput.LeftShoulder.canceled -= LeftShoulderAction;
-        playerAction.PlayerInput.RightTrigger.canceled -= RightTriggerAction;
-        playerAction.PlayerInput.LeftTrigger.canceled -= LeftTriggerAction;
-        playerAction.PlayerInput.Start.canceled -= StartAction;
-        playerAction.PlayerInput.Select.canceled -= SelectAction;
-
-        playerAction.UI.Cancel.canceled -= CancelAction;
-        playerAction.UI.Submit.canceled -= SubmitAction;
+        //Add Canceled Events
+        playerAction.UI.ButtonNorth.canceled -= ctx => ButtonAction(ctx, INPUT.UI_KeyButtonNorth);
+        playerAction.UI.ButtonSouth.canceled -= ctx => ButtonAction(ctx, INPUT.UI_KeyButtonSouth);
+        playerAction.UI.ButtonEast.canceled -= ctx => ButtonAction(ctx, INPUT.UI_KeyButtonEast);
+        playerAction.UI.ButtonWest.canceled -= ctx => ButtonAction(ctx, INPUT.UI_KeyButtonWest);
+        playerAction.UI.RightShoulder.canceled -= ctx => ButtonAction(ctx, INPUT.UI_ButtonRightShoulder);
+        playerAction.UI.LeftShoulder.canceled -= ctx => ButtonAction(ctx, INPUT.UI_ButtonLeftShoulder);
+        playerAction.UI.RightTrigger.canceled -= ctx => ButtonAction(ctx, INPUT.UI_ButtonRightTrigger);
+        playerAction.UI.LeftTrigger.canceled -= ctx => ButtonAction(ctx, INPUT.UI_ButtonLeftTrigger);
+        playerAction.UI.Start.canceled -= ctx => ButtonAction(ctx, INPUT.UI_Start);
+        playerAction.UI.Select.canceled -= ctx => ButtonAction(ctx, INPUT.UI_Select);
         #endregion
 
         playerAction.UI.Disable(); // Disable action with new inputs
         playerAction.PlayerInput.Disable(); // Disable action with new inputs
         StopAllCoroutines();
+        isDestroyed = true;
     }
 
-    private void OnDestroy()
+    private void HandleRebindCompeleted()
     {
-        StopAllCoroutines();
-        isDestroyed = true;
+        playerAction.Disable();
+        playerAction = LoadActions.LoadAllActions(actions);
+        playerAction.Enable();
     }
 
     private void Update()
@@ -414,9 +316,8 @@ public class InputHandler : Singleton<InputHandler>
     public void ButtonAction(InputAction.CallbackContext context, INPUT keyInput)
     {
         if (isDestroyed)
-        {
             return;
-        }
+
 
         if (context.started)
         {
@@ -534,285 +435,5 @@ public class InputHandler : Singleton<InputHandler>
     {
         float angleRad = angle * Mathf.Deg2Rad;
         return new Vector2(Mathf.Cos(angleRad), Mathf.Sin(angleRad));
-    }
-
-
-    private static bool UseInput(ref bool keyInput)
-    {
-        if (keyInput)
-        {
-            keyInput = false;
-            return true;
-        }
-        return false;
-    }
-
-    public void ButtonNorthAction(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            keyHeldButtonNorth = true;
-            keyDownButtonNorth = true;
-        }
-        if (context.canceled)
-        {
-            keyHeldButtonNorth = false;
-            keyUpButtonNorth = true;
-        }
-        StartCoroutine(ResetAllPerKeysCoroutine());
-    }
-    public static bool KeyHeldButtonNorth() => keyHeldButtonNorth;
-    public static bool KeyDownButtonNorth() => UseInput(ref keyDownButtonNorth);
-    public static bool KeyUpButtonNorth() => UseInput(ref keyUpButtonNorth);
-
-    public void ButtonSouthAction(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            keyHeldButtonSouth = true;
-            keyDownButtonSouth = true;
-        }
-        if (context.canceled)
-        {
-            keyHeldButtonSouth = false;
-            keyUpButtonSouth = true;
-        }
-        StartCoroutine(ResetAllPerKeysCoroutine());
-    }
-
-    public static bool KeyHeldButtonSouth() => keyHeldButtonSouth;
-    public static bool KeyDownButtonSouth() => UseInput(ref keyDownButtonSouth);
-    public static bool KeyUpButtonSouth() => UseInput(ref keyUpButtonSouth);
-
-    public void ButtonWestAction(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            keyHeldButtonWest = true;
-            keyDownButtonWest = true;
-        }
-        if (context.canceled)
-        {
-            keyHeldButtonWest = false;
-            keyUpButtonWest = true;
-        }
-        StartCoroutine(ResetAllPerKeysCoroutine());
-    }
-    public static bool KeyHeldButtonWest() => keyHeldButtonWest;
-    public static bool KeyDownButtonWest() => UseInput(ref keyDownButtonWest);
-    public static bool KeyUpButtonWest() => UseInput(ref keyUpButtonWest);
-
-    public void ButtonEastAction(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            keyHeldButtonEast = true;
-            keyDownButtonEast = true;
-        }
-        if (context.canceled)
-        {
-            keyHeldButtonEast = false;
-            keyUpButtonEast = true;
-        }
-        StartCoroutine(ResetAllPerKeysCoroutine());
-    }
-
-    public static bool KeyHeldButtonEast() => keyHeldButtonEast;
-    public static bool KeyDownButtonEast() => UseInput(ref keyDownButtonEast);
-    public static bool KeyUpButtonEast() => UseInput(ref keyUpButtonEast);
-
-    public void RightShoulderAction(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            keyHeldRightShoulder = true;
-            keyDownRightShoulder = true;
-        }
-        if (context.canceled)
-        {
-            keyHeldRightShoulder = false;
-            keyUpRightShoulder = true;
-        }
-        StartCoroutine(ResetAllPerKeysCoroutine());
-    }
-
-    public static bool KeyHeldRightShoulder() => keyHeldRightShoulder;
-    public static bool KeyDownRightShoulder() => UseInput(ref keyDownRightShoulder);
-    public static bool KeyUpRightShoulder() => UseInput(ref keyUpRightShoulder);
-
-    public void LeftShoulderAction(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            keyHeldLeftShoulder = true;
-            keyDownLeftShoulder = true;
-        }
-        if (context.canceled)
-        {
-            keyHeldLeftShoulder = false;
-            keyUpLeftShoulder = true;
-        }
-        StartCoroutine(ResetAllPerKeysCoroutine());
-    }
-    public static bool KeyHeldLeftShoulder() => keyHeldLeftShoulder;
-    public static bool KeyDownLeftShoulder() => UseInput(ref keyDownLeftShoulder);
-    public static bool KeyUpLeftShoulder() => UseInput(ref keyUpLeftShoulder);
-
-    public void RightTriggerAction(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            keyHeldRightTrigger = true;
-            keyDownRightTrigger = true;
-            StartCoroutine(ResetAllPerKeysCoroutine());
-        }
-        else if (context.canceled)
-        {
-            keyHeldRightTrigger = false;
-            keyUpRightTrigger = true;
-            StartCoroutine(ResetAllPerKeysCoroutine());
-        }
-    }
-
-    public static bool KeyHeldRightTrigger() => keyHeldRightTrigger;
-    public static bool KeyDownRightTrigger() => UseInput(ref keyDownRightTrigger);
-    public static bool KeyUpRightTrigger() => UseInput(ref keyUpRightTrigger);
-
-    public void LeftTriggerAction(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            keyHeldLeftTrigger = true;
-            keyDownLeftTrigger = true;
-            StartCoroutine(ResetAllPerKeysCoroutine());
-        }
-        if (context.canceled)
-        {
-            keyHeldLeftTrigger = false;
-            keyUpLeftTrigger = true;
-            StartCoroutine(ResetAllPerKeysCoroutine());
-        }
-    }
-    public static bool KeyHeldLeftTrigger() => keyHeldLeftTrigger;
-    public static bool KeyDownLeftTrigger() => UseInput(ref keyDownLeftTrigger);
-    public static bool KeyUpLeftTrigger() => UseInput(ref keyUpLeftTrigger);
-
-
-    public void StartAction(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            keyHeldStart = true;
-            keyDownStart = true;
-        }
-        if (context.canceled)
-        {
-            keyHeldStart = false;
-            keyUpStart = true;
-        }
-        StartCoroutine(ResetAllPerKeysCoroutine());
-    }
-
-    public static bool KeyHeldStart() => keyHeldStart;
-    public static bool KeyDownStart() => UseInput(ref keyDownStart);
-    public static bool KeyUpStart() => UseInput(ref keyUpStart);
-    public void SelectAction(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            keyHeldSelect = true;
-            keyDownSelect = true;
-        }
-        if (context.canceled)
-        {
-            keyHeldSelect = false;
-            keyUpSelect = true;
-        }
-        StartCoroutine(ResetAllPerKeysCoroutine());
-    }
-    public static bool KeyHeldSelect() => keyHeldSelect;
-    public static bool KeyDownSelect() => UseInput(ref keyDownSelect);
-    public static bool KeyUpSelect() => UseInput(ref keyUpSelect);
-
-    public void CancelAction(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            keyHeldCancel = true;
-            keyDownCancel = true;
-        }
-        if (context.canceled)
-        {
-            keyHeldCancel = false;
-            keyUpCancel = true;
-        }
-        StartCoroutine(ResetAllPerKeysCoroutine());
-    }
-
-    public static bool KeyHeldCancel() => keyHeldCancel;
-    public static bool KeyDownCancel() => UseInput(ref keyDownCancel);
-    public static bool KeyUpCancel() => UseInput(ref keyDownCancel);
-    public void SubmitAction(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            keyHeldSubmit = true;
-            keyDownSubmit = true;
-        }
-        if (context.canceled)
-        {
-            keyHeldSubmit = false;
-            keyUpSubmit = true;
-        }
-        StartCoroutine(ResetAllPerKeysCoroutine());
-    }
-    public static bool KeyHeldSubmit() => keyHeldSubmit;
-    public static bool KeyDownSubmit() => UseInput(ref keyDownSubmit);
-    public static bool KeyUpSubmit() => UseInput(ref keyDownSubmit);
-
-
-    public void UseAllInputs()
-    {
-        UseInput(ref keyDownButtonNorth);
-        UseInput(ref keyUpButtonNorth);
-
-        UseInput(ref keyDownButtonSouth);
-        UseInput(ref keyUpButtonSouth);
-
-        UseInput(ref keyDownButtonWest);
-        UseInput(ref keyUpButtonWest);
-
-        UseInput(ref keyDownButtonEast);
-        UseInput(ref keyUpButtonEast);
-
-        UseInput(ref keyDownLeftShoulder);
-        UseInput(ref keyUpLeftShoulder);
-
-        UseInput(ref keyDownRightShoulder);
-        UseInput(ref keyUpRightShoulder);
-
-        UseInput(ref keyDownLeftTrigger);
-        UseInput(ref keyUpLeftTrigger);
-
-        UseInput(ref keyDownRightTrigger);
-        UseInput(ref keyUpRightTrigger);
-
-        UseInput(ref keyDownStart);
-        UseInput(ref keyUpStart);
-
-        UseInput(ref keyDownSelect);
-        UseInput(ref keyUpSelect);
-
-        UseInput(ref keyDownCancel);
-        UseInput(ref keyUpCancel);
-
-        UseInput(ref keyDownSubmit);
-        UseInput(ref keyUpSubmit);
-    }
-
-    private IEnumerator ResetAllPerKeysCoroutine()
-    {
-        yield return new WaitForEndOfFrame();
-        UseAllInputs();
     }
 }
