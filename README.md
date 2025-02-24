@@ -18,9 +18,18 @@ public enum INPUT
     ButtonLeftTrigger,
     Start,
     Select,
-    UICancel,
-    UISubmit,
+    UI_KeyButtonNorth,
+    UI_KeyButtonSouth,
+    UI_KeyButtonWest,
+    UI_KeyButtonEast,
+    UI_ButtonRightShoulder,
+    UI_ButtonLeftShoulder,
+    UI_ButtonRightTrigger,
+    UI_ButtonLeftTrigger,
+    UI_Start,
+    UI_Select
 }
+
 
 [field: SerializeField] public static Vector2 LeftAnalog { get; private set; }
 [field: SerializeField] public static Vector2 LeftAnalogRaw { get; private set; }
@@ -43,19 +52,41 @@ public class ExampleInputUse : MonoBehaviour
     [SerializeField] private Vector2 leftAnalog;
     [SerializeField] private Vector2 rightAnalog;
 
-    void Update()
+    private void Update()
     {
+        #region PLAYER_EXAMPLE
         if (InputHandler.KeyDown(INPUT.KeyButtonSouth))
-            Debug.Log("BUTTON SOUTH KEY DOWN");
+            Debug.Log("PLAYER BUTTON SOUTH KEY DOWN");
 
         if (InputHandler.KeyUp(INPUT.KeyButtonSouth))
-            Debug.Log("BUTTON SOUTH KEY UP");
+            Debug.Log("PLAYER BUTTON SOUTH KEY UP");
 
         if (InputHandler.KeyHeld(INPUT.KeyButtonSouth))
-            Debug.Log("BUTTON SOUTH KEY HELD");
+            Debug.Log("PLAYER BUTTON SOUTH KEY HELD");
+
+        if (JumpInputAction())
+            Debug.Log("PLAYER JUMP");
+        #endregion
+
+        #region UI_EXAMPLE
+        if (InputHandler.KeyDown(INPUT.UI_KeyButtonSouth))
+            Debug.Log("UI BUTTON SOUTH KEY DOWN");
+
+        if (InputHandler.KeyUp(INPUT.UI_KeyButtonSouth))
+            Debug.Log("UI BUTTON SOUTH KEY UP");
+
+        if (InputHandler.KeyHeld(INPUT.UI_KeyButtonSouth))
+            Debug.Log("UI BUTTON SOUTH KEY HELD");
+        #endregion
 
         leftAnalog = InputHandler.LeftAnalogNormalized;
         rightAnalog = InputHandler.RightAnalog;
+    }
+
+    //Example of method 
+    public bool JumpInputAction()
+    {
+        return InputHandler.KeyDown(INPUT.KeyButtonSouth);
     }
 }
 ```
